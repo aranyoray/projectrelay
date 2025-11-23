@@ -127,7 +127,7 @@ export class DatabaseService {
       }
 
       const { data, error } = await query
-      return { data, error }
+      return { data: data as T[] | null, error }
     } catch (err) {
       return { data: null, error: err instanceof Error ? err : new Error('Database fetch failed') }
     }
