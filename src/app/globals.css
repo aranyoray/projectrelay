@@ -443,15 +443,6 @@ html, body {
     transform: translateX(-50%);
 }
 
-.liquid-ether-container {
-    position: relative;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-    touch-action: none;
-    background-color: black;
-}  
-
 .auth-container {
   min-height: 100vh;
   display: flex;

@@ -10,7 +10,6 @@ import {
   formatCategory,
   getProjectAgeLabel
 } from '@/lib/placeholder-data'
-import { AuthService } from '@/lib/auth'
 
 export default function ProjectDetailPage() {
   const router = useRouter()
@@ -19,7 +18,6 @@ export default function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [isGuest, setIsGuest] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
@@ -40,12 +38,6 @@ export default function ProjectDetailPage() {
     const guestMode = localStorage.getItem('guestMode')
     if (guestMode === 'true') {
       setIsGuest(true)
-    } else {
-      AuthService.getCurrentUser().then(({ user }) => {
-        if (user) {
-          setUserId(user.id)
-        }
-      })
     }
 
     const savedBookmarks = localStorage.getItem('bookmarks')
@@ -112,7 +104,7 @@ export default function ProjectDetailPage() {
         setShowContactModal(false)
         setSubmitSuccess(false)
       }, 2000)
-    } catch (err) {
+    } catch {
       setError('Failed to send message. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -159,7 +151,7 @@ export default function ProjectDetailPage() {
         setShowTransferModal(false)
         setSubmitSuccess(false)
       }, 2000)
-    } catch (err) {
+    } catch {
       setError('Failed to send transfer request. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -309,7 +301,7 @@ export default function ProjectDetailPage() {
                 </div>
               ) : (
                 <>
-                  <p>Send a message to the owner of "{project.name}"</p>
+                  <p>Send a message to the owner of &quot;{project.name}&quot;</p>
                   <textarea
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
@@ -358,7 +350,7 @@ export default function ProjectDetailPage() {
                 </div>
               ) : (
                 <>
-                  <p>Request to take over "{project.name}"</p>
+                  <p>Request to take over &quot;{project.name}&quot;</p>
                   <textarea
                     value={transferMessage}
                     onChange={(e) => setTransferMessage(e.target.value)}
