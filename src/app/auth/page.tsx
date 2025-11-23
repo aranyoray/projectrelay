@@ -1,27 +1,54 @@
 'use client'
 
 import { FormEvent, useState } from 'react';
-import { AuthService } from '@/lib/auth';
+import { AuthService, validateEmail } from '@/lib/auth';
 
 export default function AuthPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [signUp, setSignUp] = useState(false);
     const [errMsg, setErrMsg] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     async function handleSignIn() {
         setErrMsg('');
-        const { error } = await AuthService.signIn({ email, password });
-        if (error) {
-            console.error(error);
-            setErrMsg('Incorrect email or password. Try again or reset your password.');
+
+        // Client-side validation
+        const emailError = validateEmail(email);
+        if (emailError) {
+            setErrMsg(emailError);
             return;
+        }
+
+        if (!password) {
+            setErrMsg('Password is required');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const { error } = await AuthService.signIn({ email, password });
+            if (error) {
+                console.error(error);
+                setErrMsg('Incorrect email or password. Try again or reset your password.');
+                return;
+            }
+            // Redirect on success
+            window.location.href = '/projects';
+        } catch (err) {
+            console.error(err);
+            setErrMsg('An unexpected error occurred. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     }
 
     function handleSignUp() {
-        if (!email) {
-            setErrMsg('Enter your email so we can save your progress.');
+        const emailError = validateEmail(email);
+        if (emailError) {
+            setErrMsg(emailError === 'Email is required'
+                ? 'Enter your email so we can save your progress.'
+                : emailError);
             return;
         }
 
@@ -115,8 +142,12 @@ export default function AuthPage() {
 
                             {errMsg && <div className="auth-error">{errMsg}</div>}
 
-                            <button type="submit" className="submit-button auth-submit-button">
-                                {signUp ? 'Continue to sign up' : 'Sign in'}
+                            <button
+                                type="submit"
+                                className="submit-button auth-submit-button"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Signing in...' : (signUp ? 'Continue to sign up' : 'Sign in')}
                             </button>
                         </form>
                         {!signUp && (
@@ -130,6 +161,24 @@ export default function AuthPage() {
                                 </button>
                             </div>
                         )}
+                        <div className="auth-guest-section">
+                            <div className="auth-divider">
+                                <span>or</span>
+                            </div>
+                            <button
+                                type="button"
+                                className="guest-button"
+                                onClick={() => {
+                                    localStorage.setItem('guestMode', 'true');
+                                    window.location.href = '/projects';
+                                }}
+                            >
+                                Continue as Guest
+                            </button>
+                            <p className="guest-disclaimer">
+                                Browse projects without an account. Some features will be limited.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
