@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { AuthService } from '@/lib/auth';
+import { AuthService, validateEmail, validatePassword, validateUsername, validateZipCode } from '@/lib/auth';
 
 // US States and Territories
 const US_STATES_AND_TERRITORIES = [
@@ -104,6 +104,7 @@ export default function SignUpPage() {
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
     const [lookingForProject, setLookingForProject] = useState(false);
     const [manualEntryMode, setManualEntryMode] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Auto-fill email from URL search params
     useEffect(() => {
@@ -196,12 +197,23 @@ export default function SignUpPage() {
         setErrMsg('');
 
         const newErrors: Record<string, string> = {};
-        if (!email) newErrors.email = 'Email is required.';
-        if (!password) newErrors.password = 'Password is required.';
+
+        // Use validation functions
+        const emailError = validateEmail(email);
+        if (emailError) newErrors.email = emailError;
+
+        const passwordError = validatePassword(password);
+        if (passwordError) newErrors.password = passwordError;
+
         if (!firstName) newErrors.firstName = 'First name is required.';
         if (!lastName) newErrors.lastName = 'Last name is required.';
         if (!grade) newErrors.grade = 'Education status is required.';
-        if (!username) newErrors.username = 'Username is required.';
+
+        const usernameError = validateUsername(username);
+        if (usernameError) newErrors.username = usernameError;
+
+        const zipError = validateZipCode(zip);
+        if (zipError) newErrors.zip = zipError;
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -210,33 +222,43 @@ export default function SignUpPage() {
         }
 
         setErrors({});
+        setIsLoading(true);
 
-        const metadata: Record<string, any> = {
-            firstname: firstName,
-            lastname: lastName,
-            grade: grade,
-            username: username,
-            looking_for_project: lookingForProject
-        };
+        try {
+            const metadata: Record<string, any> = {
+                firstname: firstName,
+                lastname: lastName,
+                grade: grade,
+                username: username,
+                looking_for_project: lookingForProject
+            };
 
-        if (zip) metadata.zip = zip;
-        if (state) metadata.state = state;
-        if (highSchool) metadata.high_school = highSchool;
+            if (zip) metadata.zip = zip;
+            if (state) metadata.state = state;
+            if (highSchool) metadata.high_school = highSchool;
 
-        const { user, error } = await AuthService.signUp({
-            email,
-            password,
-            metadata
-        });
+            const { user, error } = await AuthService.signUp({
+                email,
+                password,
+                metadata
+            });
 
-        if (error) {
-            console.error(error);
-            setErrMsg(error.message || 'Failed to create account. Please try again.');
-            return;
-        }
+            if (error) {
+                console.error(error);
+                const errorMessage = error instanceof Error ? error.message : 'Failed to create account. Please try again.';
+                setErrMsg(errorMessage);
+                return;
+            }
 
-        if (user) {
-            window.location.href = '/auth';
+            if (user) {
+                // Redirect to projects page since user is now signed up
+                window.location.href = '/projects';
+            }
+        } catch (err) {
+            console.error(err);
+            setErrMsg('An unexpected error occurred. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -370,12 +392,14 @@ export default function SignUpPage() {
                                     <div className="form-group">
                                         <label className="form-label">ZIP Code</label>
                                         <input
-                                            className="form-input"
+                                            className={`form-input${errors.zip ? ' form-input-error' : ''}`}
                                             type="text"
                                             value={zip}
                                             onChange={(e) => setZip(e.target.value)}
                                             placeholder="ZIP code"
+                                            aria-invalid={!!errors.zip}
                                         />
+                                        {errors.zip && (<div className="field-error">{errors.zip}</div>)}
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">State</label>
@@ -420,8 +444,8 @@ export default function SignUpPage() {
                                 <div className="error-message">{errMsg}</div>
                             )}
 
-                            <button type="submit" className="submit-button">
-                                Create account
+                            <button type="submit" className="submit-button" disabled={isLoading}>
+                                {isLoading ? 'Creating account...' : 'Create account'}
                             </button>
 
                             <div className="signup-footer">
