@@ -13,7 +13,6 @@ import {
   formatCategory,
   getProjectAgeLabel
 } from '@/lib/placeholder-data'
-import { AuthService } from '@/lib/auth'
 
 const US_STATES = [
   { value: '', label: 'All States' },
@@ -53,7 +52,6 @@ const US_STATES = [
 export default function ProjectsPage() {
   const router = useRouter()
   const [isGuest, setIsGuest] = useState(false)
-  const [_userId, setUserId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [areaFilter, setAreaFilter] = useState<ProjectArea | ''>('')
   const [stateFilter, setStateFilter] = useState('')
@@ -66,12 +64,6 @@ export default function ProjectsPage() {
     const guestMode = localStorage.getItem('guestMode')
     if (guestMode === 'true') {
       setIsGuest(true)
-    } else {
-      AuthService.getCurrentUser().then(({ user }) => {
-        if (user) {
-          setUserId(user.id)
-        }
-      })
     }
 
     const savedBookmarks = localStorage.getItem('bookmarks')

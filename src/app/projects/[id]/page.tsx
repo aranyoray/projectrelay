@@ -10,7 +10,6 @@ import {
   formatCategory,
   getProjectAgeLabel
 } from '@/lib/placeholder-data'
-import { AuthService } from '@/lib/auth'
 
 export default function ProjectDetailPage() {
   const router = useRouter()
@@ -19,7 +18,6 @@ export default function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [isGuest, setIsGuest] = useState(false)
-  const [_userId, setUserId] = useState<string | null>(null)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
@@ -40,12 +38,6 @@ export default function ProjectDetailPage() {
     const guestMode = localStorage.getItem('guestMode')
     if (guestMode === 'true') {
       setIsGuest(true)
-    } else {
-      AuthService.getCurrentUser().then(({ user }) => {
-        if (user) {
-          setUserId(user.id)
-        }
-      })
     }
 
     const savedBookmarks = localStorage.getItem('bookmarks')
