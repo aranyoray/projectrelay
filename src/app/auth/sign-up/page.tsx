@@ -225,7 +225,7 @@ export default function SignUpPage() {
         setIsLoading(true);
 
         try {
-            const metadata: Record<string, any> = {
+            const metadata: Record<string, unknown> = {
                 firstname: firstName,
                 lastname: lastName,
                 grade: grade,

@@ -27,6 +27,9 @@ export interface UserProfile {
   updated_at: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
+
 // Project
 export interface Project {
   id: string
@@ -112,8 +115,8 @@ export class DatabaseService {
   static async fetch<T>(
     table: string,
     select: string = '*',
-    filters?: Record<string, any>
-  ): Promise<{ data: T[] | null; error: any }> {
+    filters?: AnyRecord
+  ): Promise<{ data: T[] | null; error: Error | null }> {
     try {
       let query = supabase.from(table).select(select)
 
@@ -133,7 +136,7 @@ export class DatabaseService {
   static async insert<T>(
     table: string,
     data: Partial<T>
-  ): Promise<{ data: T | null; error: any }> {
+  ): Promise<{ data: T | null; error: Error | null }> {
     try {
       const { data: result, error } = await supabase
         .from(table)
@@ -151,7 +154,7 @@ export class DatabaseService {
     table: string,
     id: string,
     data: Partial<T>
-  ): Promise<{ data: T | null; error: any }> {
+  ): Promise<{ data: T | null; error: Error | null }> {
     try {
       const { data: result, error } = await supabase
         .from(table)
@@ -169,7 +172,7 @@ export class DatabaseService {
   static async delete(
     table: string,
     id: string
-  ): Promise<{ error: any }> {
+  ): Promise<{ error: Error | null }> {
     try {
       const { error } = await supabase
         .from(table)
@@ -191,7 +194,7 @@ export class ProjectService {
     age?: ProjectAge
     commitment?: CommitmentLevel
     search?: string
-  }): Promise<{ data: Project[] | null; error: any }> {
+  }): Promise<{ data: Project[] | null; error: Error | null }> {
     try {
       let query = supabase
         .from('projects')
@@ -219,7 +222,7 @@ export class ProjectService {
     }
   }
 
-  static async getProjectById(id: string): Promise<{ data: Project | null; error: any }> {
+  static async getProjectById(id: string): Promise<{ data: Project | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -233,7 +236,7 @@ export class ProjectService {
     }
   }
 
-  static async getProjectsByUserId(userId: string): Promise<{ data: Project[] | null; error: any }> {
+  static async getProjectsByUserId(userId: string): Promise<{ data: Project[] | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -247,19 +250,19 @@ export class ProjectService {
     }
   }
 
-  static async createProject(project: Partial<Project>): Promise<{ data: Project | null; error: any }> {
+  static async createProject(project: Partial<Project>): Promise<{ data: Project | null; error: Error | null }> {
     return DatabaseService.insert<Project>('projects', project)
   }
 
-  static async updateProject(id: string, project: Partial<Project>): Promise<{ data: Project | null; error: any }> {
+  static async updateProject(id: string, project: Partial<Project>): Promise<{ data: Project | null; error: Error | null }> {
     return DatabaseService.update<Project>('projects', id, project)
   }
 
-  static async deleteProject(id: string): Promise<{ error: any }> {
+  static async deleteProject(id: string): Promise<{ error: Error | null }> {
     return DatabaseService.delete('projects', id)
   }
 
-  static async getRecommendedProjects(userInterests: string[], limit: number = 5): Promise<{ data: Project[] | null; error: any }> {
+  static async getRecommendedProjects(userInterests: string[], limit: number = 5): Promise<{ data: Project[] | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -274,7 +277,7 @@ export class ProjectService {
     }
   }
 
-  static async getNearbyProjects(state: string, limit: number = 10): Promise<{ data: Project[] | null; error: any }> {
+  static async getNearbyProjects(state: string, limit: number = 10): Promise<{ data: Project[] | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -293,7 +296,7 @@ export class ProjectService {
 
 // User Profile Service
 export class UserProfileService {
-  static async getProfileByUserId(userId: string): Promise<{ data: UserProfile | null; error: any }> {
+  static async getProfileByUserId(userId: string): Promise<{ data: UserProfile | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -307,15 +310,15 @@ export class UserProfileService {
     }
   }
 
-  static async createProfile(profile: Partial<UserProfile>): Promise<{ data: UserProfile | null; error: any }> {
+  static async createProfile(profile: Partial<UserProfile>): Promise<{ data: UserProfile | null; error: Error | null }> {
     return DatabaseService.insert<UserProfile>('user_profiles', profile)
   }
 
-  static async updateProfile(id: string, profile: Partial<UserProfile>): Promise<{ data: UserProfile | null; error: any }> {
+  static async updateProfile(id: string, profile: Partial<UserProfile>): Promise<{ data: UserProfile | null; error: Error | null }> {
     return DatabaseService.update<UserProfile>('user_profiles', id, profile)
   }
 
-  static async deductPoints(userId: string, amount: number): Promise<{ error: any }> {
+  static async deductPoints(userId: string, amount: number): Promise<{ error: Error | null }> {
     try {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -341,7 +344,7 @@ export class UserProfileService {
 
 // Bookmark Service
 export class BookmarkService {
-  static async getUserBookmarks(userId: string): Promise<{ data: Bookmark[] | null; error: any }> {
+  static async getUserBookmarks(userId: string): Promise<{ data: Bookmark[] | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('bookmarks')
@@ -355,11 +358,11 @@ export class BookmarkService {
     }
   }
 
-  static async addBookmark(userId: string, projectId: string): Promise<{ data: Bookmark | null; error: any }> {
+  static async addBookmark(userId: string, projectId: string): Promise<{ data: Bookmark | null; error: Error | null }> {
     return DatabaseService.insert<Bookmark>('bookmarks', { user_id: userId, project_id: projectId })
   }
 
-  static async removeBookmark(userId: string, projectId: string): Promise<{ error: any }> {
+  static async removeBookmark(userId: string, projectId: string): Promise<{ error: Error | null }> {
     try {
       const { error } = await supabase
         .from('bookmarks')
@@ -391,11 +394,11 @@ export class BookmarkService {
 
 // Message Service
 export class MessageService {
-  static async sendMessage(message: Partial<Message>): Promise<{ data: Message | null; error: any }> {
+  static async sendMessage(message: Partial<Message>): Promise<{ data: Message | null; error: Error | null }> {
     return DatabaseService.insert<Message>('messages', message)
   }
 
-  static async getConversations(userId: string): Promise<{ data: Message[] | null; error: any }> {
+  static async getConversations(userId: string): Promise<{ data: Message[] | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -409,7 +412,7 @@ export class MessageService {
     }
   }
 
-  static async markAsRead(messageId: string): Promise<{ error: any }> {
+  static async markAsRead(messageId: string): Promise<{ error: Error | null }> {
     try {
       const { error } = await supabase
         .from('messages')
@@ -425,7 +428,7 @@ export class MessageService {
 
 // Notification Service
 export class NotificationService {
-  static async getUserNotifications(userId: string): Promise<{ data: Notification[] | null; error: any }> {
+  static async getUserNotifications(userId: string): Promise<{ data: Notification[] | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('notifications')
@@ -440,11 +443,11 @@ export class NotificationService {
     }
   }
 
-  static async createNotification(notification: Partial<Notification>): Promise<{ data: Notification | null; error: any }> {
+  static async createNotification(notification: Partial<Notification>): Promise<{ data: Notification | null; error: Error | null }> {
     return DatabaseService.insert<Notification>('notifications', notification)
   }
 
-  static async markAsRead(notificationId: string): Promise<{ error: any }> {
+  static async markAsRead(notificationId: string): Promise<{ error: Error | null }> {
     try {
       const { error } = await supabase
         .from('notifications')
@@ -474,13 +477,13 @@ export class NotificationService {
 
 // Transaction Service
 export class TransactionService {
-  static async createTransaction(transaction: Partial<Transaction>): Promise<{ data: Transaction | null; error: any }> {
+  static async createTransaction(transaction: Partial<Transaction>): Promise<{ data: Transaction | null; error: Error | null }> {
     return DatabaseService.insert<Transaction>('transactions', transaction)
   }
 
-  static async updateTransactionStatus(id: string, status: Transaction['status'], stripePaymentId?: string): Promise<{ error: any }> {
+  static async updateTransactionStatus(id: string, status: Transaction['status'], stripePaymentId?: string): Promise<{ error: Error | null }> {
     try {
-      const updateData: any = { status }
+      const updateData: { status: Transaction['status']; stripe_payment_id?: string } = { status }
       if (stripePaymentId) {
         updateData.stripe_payment_id = stripePaymentId
       }
@@ -518,7 +521,7 @@ export class RequestTrackingService {
     }
   }
 
-  static async incrementRequestCount(userId: string): Promise<{ error: any }> {
+  static async incrementRequestCount(userId: string): Promise<{ error: Error | null }> {
     try {
       const weekStart = new Date()
       weekStart.setDate(weekStart.getDate() - weekStart.getDay())

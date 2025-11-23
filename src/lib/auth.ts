@@ -1,14 +1,12 @@
 import { supabase } from './supabase'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 
-export interface AuthUser extends User {
-  // Add any custom user properties here
-}
+export type AuthUser = User
 
 export interface SignUpData {
   email: string
   password: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface SignInData {
@@ -156,7 +154,7 @@ export class AuthService {
   }
 
   // Update user metadata
-  static async updateUserMetadata(metadata: Record<string, any>): Promise<{ user: AuthUser | null; error: AuthError | Error | null }> {
+  static async updateUserMetadata(metadata: Record<string, unknown>): Promise<{ user: AuthUser | null; error: AuthError | Error | null }> {
     try {
       const { data, error } = await supabase.auth.updateUser({
         data: metadata
