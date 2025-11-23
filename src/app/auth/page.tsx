@@ -161,6 +161,24 @@ export default function AuthPage() {
                                 </button>
                             </div>
                         )}
+                        <div className="auth-guest-section">
+                            <div className="auth-divider">
+                                <span>or</span>
+                            </div>
+                            <button
+                                type="button"
+                                className="guest-button"
+                                onClick={() => {
+                                    localStorage.setItem('guestMode', 'true');
+                                    window.location.href = '/projects';
+                                }}
+                            >
+                                Continue as Guest
+                            </button>
+                            <p className="guest-disclaimer">
+                                Browse projects without an account. Some features will be limited.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
