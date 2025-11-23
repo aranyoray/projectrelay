@@ -13,6 +13,7 @@ import {
   formatCategory,
   getProjectAgeLabel
 } from '@/lib/placeholder-data'
+import { AuthService } from '@/lib/auth'
 
 const US_STATES = [
   { value: '', label: 'All States' },
