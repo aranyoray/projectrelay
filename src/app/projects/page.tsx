@@ -53,7 +53,7 @@ const US_STATES = [
 export default function ProjectsPage() {
   const router = useRouter()
   const [isGuest, setIsGuest] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
+  const [_userId, setUserId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [areaFilter, setAreaFilter] = useState<ProjectArea | ''>('')
   const [stateFilter, setStateFilter] = useState('')
